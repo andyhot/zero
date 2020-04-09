@@ -50,6 +50,7 @@
   "jest": {
     "clearMocks": true,
     "coverageDirectory": "./coverage/",
-    "collectCoverage": true
+    "collectCoverage": true,
+    "testURL": "http://localhost/"
   }
 }
