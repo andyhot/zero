@@ -155,7 +155,51 @@ test('handling a request with revoked token (already used) in body', done => {
     });
 });
 
-test('handling uknkown authenticate action', done => {
+test('handling a request with revoked token (already used) in body 2', done => {
+  const token1 = jwt.sign({ user }, strategy.secret, {
+    expiresIn: strategy.ttl + 10
+  });
+  const token2 = jwt.sign({ user }, strategy.secret, {
+    expiresIn: strategy.ttl + 20
+  });
+
+  testPassport
+    .use(strategy)
+    .success(user => {
+      expect(user).toEqual(user);
+      testPassport
+        .use(strategy)
+        .success(user => {
+          expect(user).toEqual(user);
+          testPassport
+            .use(strategy)
+            .fail(info => {
+              expect(info.message).toBe('Token was already used');
+              done();
+            })
+            .req(req => {
+              req.body = {
+                token: token1
+              };
+            })
+            .authenticate();
+        })
+        .req(req => {
+          req.body = {
+            token: token2
+          };
+        })
+        .authenticate();
+    })
+    .req(req => {
+      req.body = {
+        token: token1
+      };
+    })
+    .authenticate();
+});
+
+test('handling unknown authenticate action', done => {
   testPassport
     .use(strategy)
     .error(error => {
